@@ -2,27 +2,26 @@
 	$.fn.table = function(options) {
 		var $instance = $(this);
 		var defaults = {
-				tableTmpl: 'tmpl-table',
-				paginateTmpl: 'tmpl-paginate'
+			tableTmpl: 'tmpl-table',
+			paginateTmpl: 'tmpl-paginate',
+			fetch: function(e, params) {
+				var request = $.extend(settings.request, $instance.data('request'), params);
+				$.getJSON(settings.url, request).done(function(response) {
+					$instance.trigger('render', response);
+					$instance.data('request', request);
+				});
+			},
+			render: function(e, data) {
+				$instance.trigger('will-render', data);
+				$instance.find('.table').html(tmpl(settings.tableTmpl, data.page)).data("list", data.page.items);
+				$instance.find('.paginate').html(tmpl(settings.paginateTmpl, data.page));
+				$instance.trigger('rendered');
+			}
 		};
-		var data = $instance.data();
-		var settings = $.extend(defaults, data, options);
+		var settings = $.extend(defaults, $instance.data(), options);
 		
-		$instance.on('fetch', function(e, params) {
-			var request = $.extend(settings.request, $instance.data('request'), params);
-			$.getJSON(settings.url, request).done(function(response) {
-				$instance.trigger('render', response);
-				$instance.data('request', request);
-			});
-		}).on('render', function(e, data) {
-			$instance.trigger('will-render', data);
-			$instance.find('.table')
-				.html(tmpl(settings.tableTmpl, data.page))
-				.data("list", data.page.items);
-			$instance.find('.paginate')
-				.html(tmpl(settings.paginateTmpl, data.page));
-			$instance.trigger('rendered');
-		});
+		$instance.on('fetch', settings.fetch)
+				 .on('render', settings.render);
 		
 		$instance.on('submit', '.tmpl-paginate form', function(e) {
 			e.preventDefault();
@@ -39,6 +38,7 @@
 		});
 		
 		$instance.trigger('fetch');
+		
 		return $instance;
 	};
 })(jQuery, window);

@@ -38,8 +38,7 @@
           <span aria-hidden="true" class="octicon octicon-link"></span>
       </a>Demo
     </h1>
-    <div id="demo" class="panel panel-default"
-        data-url="data.json" >
+    <div id="demo" class="panel panel-default">
         <div class="table-responsive">
             <table class="table table-striped table-hover"></table>
         </div>
@@ -61,7 +60,48 @@
 <script type="text/javascript" src="paginate-table.js"></script>
 <script>
 (function(){
-    $('#demo').table();
+	
+    
+    var page = {
+    	pageSize: 10,
+        pageNumber : 1,
+        pageCount: 0,
+        items: [],
+        itemCount: 0,
+        first: true,
+        last: true
+    }
+    
+	$.getJSON('./data.json').done(function(response) {
+		page.itemCount = response.length;
+		page.pageCount = Math.ceil(page.itemCount / page.pageSize);
+
+        $('#demo').table({
+            fetch: function(e, params) {
+            	if(params) {
+            		page.pageNumber = params.pageNumber;
+            	}
+            	
+            	page.first = page.pageNumber == 1;
+                page.last = page.pageNumber == page.pageCount;
+                
+            	page.start = (page.pageNumber - 1) * page.pageSize;
+            	page.end = page.start + page.pageSize;
+            	
+            	page.items = response.filter(function(value, index, array) {
+            		if(index >= page.start && index < page.end) {
+            			return true;
+            		}
+            		return false;
+            	});
+            	
+            	$('#demo').trigger('render', {
+                    'page': page
+                });
+            }
+        });
+	});
+	
 })();
 </script>
 <script type="text/x-tmpl" id="tmpl-table" >
@@ -69,20 +109,88 @@
 <thead>
     <tr>
         <th class="text-center">序号</th>
-        <th class="text-center">城市</th>
         <th class="text-center">国家</th>
+        <th class="text-center">城市</th>
     </tr>
 </thead>
 <tbody>
 {% for (var i=0, item; item=o.items[i]; i++) { %}
     <tr>
-        <td>{%=item.id%}</td>
-        <td class="text-center">{%=item.name%}</td>
+        <td class="text-center">{%=item.id%}</td>
         <td class="text-center">{%=item.country%}</td>
+        <td class="text-center">{%=item.name%}</td>
     </tr>
 {% } %}
 </tbody>
 </table>
+</script>
+<script type="text/x-tmpl" id="tmpl-paginate">
+<nav class="clearfix tmpl-paginate">
+    <ul class="pagination pull-left">
+    {% if (o.first) { %}
+    <li class="disabled">
+      <a href="javascript:;" aria-label="首页">
+        <span aria-hidden="true">首页</span>
+      </a>
+    </li>
+    <li class="disabled">
+      <a href="javascript:;" aria-label="上页" >
+        <span aria-hidden="true">上页</span>
+      </a>
+    </li>
+    {% } else { %}
+    <li>
+      <a href="javascript:;" class="goto-page" aria-label="首页" data-page-number="1" >
+        <span aria-hidden="true">首页</span>
+      </a>
+    </li>
+    <li>
+      <a href="javascript:;" class="goto-page" aria-label="上页" data-page-number="{%=o.pageNumber - 1%}" >
+        <span aria-hidden="true">上页</span>
+      </a>
+    </li>
+    {% } %}
+    {% if (o.last) { %}
+    <li class="disabled">
+      <a href="javascript:;" aria-label="下页" >
+        <span aria-hidden="true">下页</span>
+      </a>
+    </li>
+    <li class="disabled">
+      <a href="javascript:;" aria-label="尾页" >
+        <span aria-hidden="true">尾页</span>
+      </a>
+    </li>
+    {% } else { %}
+    <li>
+      <a href="javascript:;" class="goto-page" aria-label="下页" data-page-number="{%=o.pageNumber + 1%}" >
+        <span aria-hidden="true">下页</span>
+      </a>
+    </li>
+    <li>
+      <a href="javascript:;" class="goto-page" aria-label="尾页" data-page-number="{%=o.pageCount%}" >
+        <span aria-hidden="true">尾页</span>
+      </a>
+    </li>
+    {% } %}
+  </ul>
+  <form class="pull-right form-inline">
+    <div class="form-group">
+        <p class="form-control-static">第{%=o.pageNumber%}/{%=o.pageCount%}页</p>
+    </div>
+    <div class="form-group">
+        <p class="form-control-static">查询结果：共{%=o.itemCount%}条记录</p>
+    </div>
+    <div class="form-group">
+        <p class="form-control-static">跳转到第</p>
+        <input type="number" name="pageNumber" value="{%=o.pageNumber%}" class="form-control input-page-number"/>
+        <p class="form-control-static">页</p>
+    </div>
+    <div class="form-group">
+        <button type="submit" class="btn btn-default">GO</button>
+    </div>
+  </form>
+</nav>
 </script>
 </body>
 </html>
