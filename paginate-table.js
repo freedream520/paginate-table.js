@@ -41,4 +41,7 @@
 		
 		return $instance;
 	};
+	
+	$('[role="paginate-table"]').table();
+	
 })(jQuery, window);

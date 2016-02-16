@@ -18,6 +18,11 @@ a {
 .btn {
   display: inline-block;
   margin-bottom: 1rem;
+<<<<<<< HEAD
+=======
+  background-color: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.2);
+>>>>>>> refs/remotes/origin/gh-pages
   border-style: solid;
   border-width: 1px;
   border-radius: 0.3rem;
@@ -25,9 +30,16 @@ a {
   
   .page-header .btn{
   color: rgba(255, 255, 255, 0.7);
+<<<<<<< HEAD
   background-color: rgba(255, 255, 255, 0.08);
   border-color: rgba(255, 255, 255, 0.2);
   }
+=======
+  }
+  
+  .btn + .btn {
+    margin-left: 1rem; }
+>>>>>>> refs/remotes/origin/gh-pages
 
   .page-header .btn:hover {
   color: rgba(255, 255, 255, 0.8);
